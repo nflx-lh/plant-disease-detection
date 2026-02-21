@@ -166,14 +166,17 @@ def train_one_epoch_classifier(model: SupConViT, loader, classify_criterion, opt
            
         images, labels = images.to(device), labels.to(device)
 
+        bsz = labels.shape[0]
+
         # Clear old gradients
         optimizer.zero_grad()
 
         # Forward pass (predictions)
         features, outputs = model(images)
+        o1, o2 = torch.split(outputs, [bsz, bsz], dim=0)
 
         # Compute loss
-        loss = classify_criterion(outputs, labels)
+        loss = classify_criterion(o1, labels) + classify_criterion(o2, labels)
 
         # Backward pass (calculate gradients) and optimize
         loss.backward()
@@ -183,11 +186,13 @@ def train_one_epoch_classifier(model: SupConViT, loader, classify_criterion, opt
         running_loss += loss.item() * images.size(0)
 
         # Get predictions and update total
-        _, predicted = outputs.max(1)
+        _, predicted1 = o1.max(1)
+        _, predicted2 = o2.max(1)
         total += labels.size(0)
 
         # Count how many predictions are correct
-        correct += predicted.eq(labels).sum().item()
+        correct += predicted1.eq(labels).sum().item()
+        correct += predicted2.eq(labels).sum().item()
 
         # Update progress bar
         pbar.set_postfix(loss=loss.item(), acc=correct / total)
@@ -266,7 +271,7 @@ def main():
     model_name = config["model_name"] # should throw an error if missing
     
     # Deserialize hyperparameters
-    epochs = config["hyperparameters"].get("epochs", 10)
+    epochs = config["hyperparameters"].get("num_epochs", 10)
     batch_size = config["hyperparameters"].get("batch_size", 32)
     lr = config["hyperparameters"].get("learning_rate", 0.001)
     weight_decay = config["hyperparameters"].get("weight_decay", 0.0)
@@ -343,25 +348,39 @@ def main():
     start_time = time.time()
 
     # Training Loop
-    print("Train embedding head...")
-    for epoch in range(epochs):
-        ep_start = time.time()
+    if not (Path(checkpoint_dir) / f"{Path(args.config).stem}_embed.pt").exists():
+        print("Train embedding...")
+        for epoch in range(epochs):
+            ep_start = time.time()
 
-        # Train for one epoch
-        train_loss = train_one_epoch_embedding(model, train_loader, embed_criterion, optimizer, device, canonical_to_crop, canonical_to_disease)
+            # Train for one epoch
+            train_loss = train_one_epoch_embedding(model, train_loader, embed_criterion, optimizer, device, canonical_to_crop, canonical_to_disease)
 
-        # Print epoch results
-        dt = time.time() - ep_start
-        print(
-            f"Epoch {epoch+1}/{epochs} [{dt:.1f}s] "
-            f"Train Loss: {train_loss:.4f}"
-        )
+            # Print epoch results
+            dt = time.time() - ep_start
+            print(
+                f"Epoch {epoch+1}/{epochs} [{dt:.1f}s] "
+                f"Train Loss: {train_loss:.4f}"
+            )
 
-        # Save best embedding model
-        if train_loss < best_embed_train_loss:
-            best_embed_train_loss = train_loss
-            best_embed_model_state_dict = model.state_dict()
-            print(f"  --> New best embedding model (Train Loss: {best_embed_train_loss:.4f})")
+            # Save best embedding model
+            if train_loss < best_embed_train_loss:
+                best_embed_train_loss = train_loss
+                best_embed_model_state_dict = model.state_dict()
+                ckpt_path = Path(checkpoint_dir) / f"{Path(args.config).stem}_embed.pt"
+                torch.save(
+                    {
+                        "epoch": epoch,
+                        "model_state_dict": model.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                    },
+                    ckpt_path,
+                )
+                print(f"  --> New best embedding model (Train Loss: {best_embed_train_loss:.4f})")
+
+    else:
+        best_embed_model = torch.load((Path(checkpoint_dir) / f"{Path(args.config).stem}_embed.pt"))
+        best_embed_model_state_dict = best_embed_model["model_state_dict"]
 
     print("Train classifier head...")
     # Load best embedding model before training classifier
