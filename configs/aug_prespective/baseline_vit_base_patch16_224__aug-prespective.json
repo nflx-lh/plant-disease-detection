@@ -13,9 +13,7 @@
 
     "transformations": {
   "steps": [
-    { "name": "random_rotation", "params": { "degrees": 8 } },
-    { "name": "random_perspective", "params": { "distortion_scale": 0.2, "p": 0.1, "fill": 0} },
-    { "name": "gaussian_blur", "params": { "kernel_size": 3, "sigma": [0.1, 0.8] } }
+    { "name": "random_perspective", "params": { "distortion_scale": 0.2, "p": 0.1, "fill": 0} }
   ]
 }
 }
