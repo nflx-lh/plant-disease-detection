@@ -1,0 +1,20 @@
+{
+    "model_name": "vit_base_patch16_224",
+    "data_dir": ".",
+    "splits_dir": "data/splits",
+    "checkpoint_dir": "checkpoints/baseline",
+
+    "hyperparameters": {
+        "batch_size": 32,
+        "num_epochs": 10,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.05
+    },
+
+    "transformations": {
+  "steps": [
+    { "name": "random_rotation", "params": { "degrees": 8 } },
+    { "name": "gaussian_blur", "params": { "kernel_size": 3, "sigma": [0.1, 0.8] } }
+  ]
+}
+}

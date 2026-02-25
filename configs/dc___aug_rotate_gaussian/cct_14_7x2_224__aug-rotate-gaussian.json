@@ -1,0 +1,19 @@
+{
+    "model_name": "cct_14_7x2_224",
+    "data_dir": ".",
+    "splits_dir": "data/splits",
+    "checkpoint_dir": "checkpoints/baseline",
+
+    "hyperparameters": {
+        "batch_size": 32,
+        "num_epochs": 10,
+        "learning_rate": 0.0001
+    },
+
+    "transformations": {
+  "steps": [
+    { "name": "random_rotation", "params": { "degrees": 10 } },
+    { "name": "gaussian_blur", "params": { "kernel_size": 3, "sigma": [0.1, 1.0] } }
+  ]
+}
+}
