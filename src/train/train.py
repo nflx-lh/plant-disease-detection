@@ -25,6 +25,8 @@ from pathlib import Path
 import platform
 from tqdm import tqdm
 import json
+import random
+import numpy as np
 
 # Add project root to path BEFORE importing local modules
 sys.path.append(str(Path(__file__).resolve().parents[2]))
@@ -38,6 +40,25 @@ from src.utils.transformations import get_transforms, get_collate_fn
 # Disable SSL verification to fix for MacOS SSL error when downloading models
 if platform.system() == "Darwin":
     ssl._create_default_https_context = ssl._create_unverified_context
+
+
+def set_seed(seed=42):
+    """
+    Sets the seed for reproducibility across python, numpy, and torch.
+    """
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)  # if using multi-GPU
+
+    # Crucial for deterministic behavior on some hardware
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    # For MacOS (MPS)
+    if hasattr(torch, "mps") and torch.backends.mps.is_available():
+        torch.mps.manual_seed(seed)
 
 
 def train_one_epoch(model, loader, criterion, optimizer, device):
@@ -157,7 +178,12 @@ def validate(model, loader, criterion, device):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train Models for Plant Disease Classification")
+    # Set seed for reproducibility
+    set_seed()
+
+    parser = argparse.ArgumentParser(
+        description="Train Models for Plant Disease Classification"
+    )
     # parser.add_argument(
     #     "--model",
     #     type=str,
@@ -186,10 +212,12 @@ def main():
     checkpoint_dir = config.get("checkpoint_dir", "checkpoints")
     data_dir = config.get("data_dir", ".")
     splits_dir = config.get("splits_dir", "data/splits")
-    model_name = config["model_name"] # should throw an error if missing
-    
+    model_name = config["model_name"]  # should throw an error if missing
+
     # Deserialize hyperparameters
-    epochs = config["hyperparameters"].get("epochs", 10)
+    epochs = config["hyperparameters"].get(
+        "num_epochs", config["hyperparameters"].get("epochs", 10)
+    )
     batch_size = config["hyperparameters"].get("batch_size", 32)
     lr = config["hyperparameters"].get("learning_rate", 0.001)
     weight_decay = config["hyperparameters"].get("weight_decay", 0.0)
@@ -218,12 +246,12 @@ def main():
         print(f"Error: Split partitions not found in {splits_dir}")
         print("Please run M1 pipeline first.")
         return
-    
+
     # Model
     print(f"Initializing {model_name}...")
     model = get_model(model_name, num_classes=26)
     model.to(device)
-    
+
     # Get data transforms based on model
     train_transform, val_transform, test_transform = get_transforms(
         model=model,

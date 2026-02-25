@@ -1,0 +1,25 @@
+{
+    "model_name": "mobilenet_v3_small",
+    "data_dir": ".",
+    "splits_dir": "data/splits",
+    "checkpoint_dir": "checkpoints/baseline",
+
+    "hyperparameters": {
+        "batch_size": 32,
+        "num_epochs": 10,
+        "learning_rate": 0.001
+    },
+
+    "transformations": [
+        {
+            "name": "random_erasing",
+            "params": {
+                "p": 0.25,
+                "scale": [0.02, 0.12],
+                "ratio": [0.3, 3.3],
+                "value": 0,
+                "inplace": false
+            }
+        }
+    ]
+}

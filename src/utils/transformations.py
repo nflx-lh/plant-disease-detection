@@ -24,7 +24,9 @@ def _to_tuple2(x, name: str):
     raise ValueError(f"{name} must be a list/tuple of length 2, got: {x}")
 
 
-def _normalize_steps(transforms_config: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]]) -> List[Dict[str, Any]]:
+def _normalize_steps(
+    transforms_config: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]],
+) -> List[Dict[str, Any]]:
     """
     Support BOTH formats:
       A) {"steps": [ ... ]}
@@ -85,8 +87,12 @@ def _build_transform_from_step(step: Dict[str, Any]):
     elif name == "random_resized_crop":
         size = params.get("size", 224)
         scale = _to_tuple2(params.get("scale", [0.8, 1.0]), "random_resized_crop.scale")
-        ratio = _to_tuple2(params.get("ratio", [0.75, 1.3333]), "random_resized_crop.ratio")
-        interpolation = params.get("interpolation", transforms.InterpolationMode.BILINEAR)
+        ratio = _to_tuple2(
+            params.get("ratio", [0.75, 1.3333]), "random_resized_crop.ratio"
+        )
+        interpolation = params.get(
+            "interpolation", transforms.InterpolationMode.BILINEAR
+        )
         antialias = params.get("antialias", True)
         return transforms.RandomResizedCrop(
             size=size,
@@ -108,7 +114,9 @@ def _build_transform_from_step(step: Dict[str, Any]):
             scale = _to_tuple2(scale, "random_affine.scale")
         # shear can be number or sequence in torchvision
 
-        interpolation = params.get("interpolation", transforms.InterpolationMode.BILINEAR)
+        interpolation = params.get(
+            "interpolation", transforms.InterpolationMode.BILINEAR
+        )
         fill = params.get("fill", 0)
 
         return transforms.RandomAffine(
@@ -130,7 +138,9 @@ def _build_transform_from_step(step: Dict[str, Any]):
     elif name == "random_perspective":
         distortion_scale = float(params.get("distortion_scale", 0.1))
         p = float(params.get("p", 0.3))
-        interpolation = params.get("interpolation", transforms.InterpolationMode.BILINEAR)
+        interpolation = params.get(
+            "interpolation", transforms.InterpolationMode.BILINEAR
+        )
         fill = params.get("fill", 0)
         return transforms.RandomPerspective(
             distortion_scale=distortion_scale,
@@ -166,7 +176,9 @@ def _build_transform_from_step(step: Dict[str, Any]):
         )
 
 
-def _inject_custom_train_transforms(train_transform, custom_steps: List[Dict[str, Any]]):
+def _inject_custom_train_transforms(
+    train_transform, custom_steps: List[Dict[str, Any]]
+):
     """
     Inject custom transforms into train pipeline only.
     - image-space transforms are inserted BEFORE tensor conversion step
@@ -178,8 +190,10 @@ def _inject_custom_train_transforms(train_transform, custom_steps: List[Dict[str
 
     custom_ops = [_build_transform_from_step(s) for s in custom_steps]
 
-    image_ops = [op for op in custom_ops if not isinstance(op, transforms.RandomErasing) and op is not None]
-    erasing_ops = [op for op in custom_ops if isinstance(op, transforms.RandomErasing) and op is not None]
+    image_ops = [
+        op for op in custom_ops if not isinstance(op, transforms.RandomErasing)
+    ]
+    erasing_ops = [op for op in custom_ops if isinstance(op, transforms.RandomErasing)]
 
     if not hasattr(train_transform, "transforms"):
         return transforms.Compose(image_ops + [train_transform] + erasing_ops)
@@ -204,7 +218,9 @@ def _inject_custom_train_transforms(train_transform, custom_steps: List[Dict[str
     if tensor_idx is None:
         ops_after_image_insert = image_ops + base_ops
     else:
-        ops_after_image_insert = base_ops[:tensor_idx] + image_ops + base_ops[tensor_idx:]
+        ops_after_image_insert = (
+            base_ops[:tensor_idx] + image_ops + base_ops[tensor_idx:]
+        )
 
     # 2) Place RandomErasing after normalize if normalize exists, else append
     if erasing_ops:
@@ -217,7 +233,11 @@ def _inject_custom_train_transforms(train_transform, custom_steps: List[Dict[str
         if norm_idx is None:
             final_ops = ops_after_image_insert + erasing_ops
         else:
-            final_ops = ops_after_image_insert[: norm_idx + 1] + erasing_ops + ops_after_image_insert[norm_idx + 1 :]
+            final_ops = (
+                ops_after_image_insert[: norm_idx + 1]
+                + erasing_ops
+                + ops_after_image_insert[norm_idx + 1 :]
+            )
     else:
         final_ops = ops_after_image_insert
 
@@ -231,7 +251,7 @@ def get_transforms(
     model,
     model_name: str,
     image_size: int = 224,
-    transforms_config: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]] = None
+    transforms_config: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]] = None,
 ):
     """
     Returns appropriate data transformations for the given model.
@@ -244,7 +264,9 @@ def get_transforms(
     Returns:
         (train_transform, val_transform, test_transform)
     """
-    train_transform, val_transform, test_transform = get_default_transforms(model, model_name, image_size)
+    train_transform, val_transform, test_transform = get_default_transforms(
+        model, model_name, image_size
+    )
 
     custom_steps = _normalize_steps(transforms_config)
     if custom_steps:
@@ -303,54 +325,21 @@ def get_default_transforms(model, model_name: str, image_size: int = 224):
     Returns default data transformations for the given model.
     """
 
-    if model_name in ["mobilenet_v3_small", "efficientnet_b0", "cct_14_7x2_224"]:
-        normalize = transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225],
-        )
-
-        train_transform = transforms.Compose(
-            [
-                transforms.Resize((image_size, image_size)),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                normalize,
-            ]
-        )
-
-        val_transform = transforms.Compose(
-            [
-                transforms.Resize((image_size, image_size)),
-                transforms.ToTensor(),
-                normalize,
-            ]
-        )
-
-        test_transform = transforms.Compose(
-            [
-                transforms.Resize((image_size, image_size)),
-                transforms.ToTensor(),
-                normalize,
-            ]
-        )
-
-    elif model_name in ["vit_base_patch16_224", "swin_base_patch4_window7_224", "maxvit_base_tf_224"]:
+    if model_name in [
+        "mobilenet_v3_small",
+        "efficientnet_b0",
+        "vit_base_patch16_224",
+        "swin_base_patch4_window7_224",
+        "maxvit_base_tf_224",
+        "cct_14_7x2_224",
+    ]:
         data_config = resolve_model_data_config(model)
 
-        train_transform = create_transform(
-            **data_config,
-            is_training=True
-        )
+        train_transform = create_transform(**data_config, is_training=True)
 
-        val_transform = create_transform(
-            **data_config,
-            is_training=False
-        )
+        val_transform = create_transform(**data_config, is_training=False)
 
-        test_transform = create_transform(
-            **data_config,
-            is_training=False
-        )
+        test_transform = create_transform(**data_config, is_training=False)
 
     else:
         raise ValueError(f"Unsupported model name: {model_name}")

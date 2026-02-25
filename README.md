@@ -202,13 +202,13 @@ Train a CNN model on the PlantVillage training set:
 #### MobileNetV3
 ```bash
 # Train MobileNetV3 Small (faster, ~13 mins)
-python src/train/train_cnn.py --model mobilenet_v3_small --epochs 10
+python src/train/train.py --config configs/baseline_mobilenet_v3_small.json
 ```
 
 #### EfficientNetB0
 ```bash
 # Train EfficientNetB0 (slower, better performance, ~28 mins)
-python src/train/train_cnn.py --model efficientnet_b0 --epochs 10
+python src/train/train.py --config configs/baseline_efficientnet_b0.json
 ```
 
 **Optional arguments:**
@@ -234,17 +234,19 @@ Evaluate a trained model on both test sets (PlantVillage and PlantDoc):
 ##### MobileNetV3
 ```bash
 # Evaluate MobileNetV3
-python src/eval/evaluate_cnn.py \
-  --model-path checkpoints/cnn_baseline_mobilenet_v3_small.pt \
-  --model-name mobilenet_v3_small
+python src/eval/evaluate.py \
+  --model-path checkpoints/baseline/baseline_mobilenet_v3_small.pt \
+  --model-name mobilenet_v3_small \
+  --output-file outputs/baseline_mobilenet_v3_small.csv
 ```
 
 #### EfficientNetB0
 ```bash
 # Evaluate EfficientNetB0
-python src/eval/evaluate_cnn.py \
-  --model-path checkpoints/cnn_baseline_efficientnet_b0.pt \
-  --model-name efficientnet_b0
+python src/eval/evaluate.py \
+  --model-path checkpoints/baseline/baseline_efficientnet_b0.pt \
+  --model-name efficientnet_b0 \
+  --output-file outputs/baseline_efficientnet_b0.csv
 ```
 
 **Optional arguments:**
@@ -346,7 +348,7 @@ Evaluate a trained model on both test sets (PlantVillage and PlantDoc):
 ```bash
 # Example: Evaluate vit_base_patch16_224
 python src/eval/evaluate.py \
-  --model-path checkpoints/baseline_vit_base_patch16_224.pt \
+  --model-path checkpoints/baseline/baseline_vit_base_patch16_224.pt \
   --model-name vit_base_patch16_224 \
   --output-file outputs/baseline_vit_base_patch16_224.csv
 ```
