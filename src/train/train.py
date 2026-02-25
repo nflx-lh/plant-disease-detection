@@ -34,7 +34,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2]))
 # Import helpers for data and model loading
 from src.utils.dataloaders import get_train_dataloader, get_val_dataloader
 from src.utils.baseline_models import get_model
-from src.utils.transformations import get_transforms
+from src.utils.transformations import get_transforms, get_collate_fn
 
 # Only runs if on MacOS (Darwin is the OS kernel name for MacOS)
 # Disable SSL verification to fix for MacOS SSL error when downloading models
@@ -108,10 +108,16 @@ def train_one_epoch(model, loader, criterion, optimizer, device):
 
         # Get predictions and update total
         _, predicted = outputs.max(1)
-        total += labels.size(0)
+        
+        if labels.ndim == 2:  # mixup/cutmix case
+            hard_labels = labels.argmax(dim=1)
+        else:
+            hard_labels = labels
+
+        total += hard_labels.size(0)
 
         # Count how many predictions are correct
-        correct += predicted.eq(labels).sum().item()
+        correct += predicted.eq(hard_labels).sum().item()
 
         # Update progress bar
         pbar.set_postfix(loss=loss.item(), acc=correct / total)
@@ -191,9 +197,8 @@ def main():
     # parser.add_argument("--splits-dir", type=str, default="data/splits")
     # parser.add_argument("--output-dir", type=str, default="outputs")
     # parser.add_argument("--checkpoint-dir", type=str, default="checkpoints")
-    parser.add_argument(
-        "--config", type=str, required=True, help="Path to config JSON file"
-    )
+    parser.add_argument("--config", type=str, required=True, help="Path to config JSON file")
+    parser.add_argument("--num_workers", type=int, default=4, help="Number of DataLoader workers")
     parser.add_argument("--debug", action="store_true", help="Run with small subset")
 
     args = parser.parse_args()
@@ -217,7 +222,10 @@ def main():
     lr = config["hyperparameters"].get("learning_rate", 0.001)
     weight_decay = config["hyperparameters"].get("weight_decay", 0.0)
 
-    # Setup directories
+    # Deserialize transformations config
+    transform_config = config.get("transformations", None)
+
+    # Setup directories 
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
 
@@ -249,16 +257,23 @@ def main():
         model=model,
         model_name=model_name,
         image_size=224,
-        transforms_config=config.get("transformations"),
+        transforms_config=transform_config
+    )
+
+    # Get custom collate function if CutMix or MixUp is specified
+    train_collate_fn = get_collate_fn(
+        transforms_config=transform_config
     )
 
     # Load Data
     print(f"Loading data from {splits_dir}...")
     train_loader = get_train_dataloader(
-        train_csv, root_dir=data_dir, batch_size=batch_size, transforms=train_transform
+        train_csv, root_dir=data_dir, batch_size=batch_size, transforms=train_transform, collate_fn=train_collate_fn,
+        num_workers=args.num_workers
     )
     val_loader = get_val_dataloader(
-        val_csv, root_dir=data_dir, batch_size=batch_size, transforms=val_transform
+        val_csv, root_dir=data_dir, batch_size=batch_size, transforms=val_transform,
+        num_workers=args.num_workers
     )
 
     # Debug mode: truncate datasets

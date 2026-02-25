@@ -54,7 +54,8 @@ def get_train_dataloader(
     batch_size: int = 32,
     num_workers: int = 4,
     transforms: Optional[transforms.Compose] = None,
-) -> Tuple[DataLoader, DataLoader]:
+    collate_fn=None
+) -> DataLoader:
     """
     Creates DataLoaders for training and validation with appropriate data augmentation.
 
@@ -81,6 +82,7 @@ def get_train_dataloader(
         shuffle=True,
         num_workers=num_workers,
         pin_memory=True,
+        collate_fn=collate_fn
     )
 
     return train_loader
@@ -91,7 +93,9 @@ def get_val_dataloader(
     batch_size: int = 32,
     img_size: int = 224,
     num_workers: int = 4,
-    transforms: Optional[transforms.Compose] = None) -> DataLoader:
+    transforms: Optional[transforms.Compose] = None,
+    collate_fn=None
+    )-> DataLoader:
     """
     Creates DataLoader for validation.
 
@@ -115,6 +119,7 @@ def get_val_dataloader(
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
+        collate_fn=collate_fn
     )
 
     return val_loader
@@ -127,6 +132,7 @@ def get_test_dataloader(
     img_size: int = 224,
     num_workers: int = 4,
     transforms: Optional[transforms.Compose] = None,
+    collate_fn=None
 ) -> DataLoader:
     """
     Creates DataLoader for testing.
@@ -151,4 +157,5 @@ def get_test_dataloader(
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
+        collate_fn=collate_fn
     )

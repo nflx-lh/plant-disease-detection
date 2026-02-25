@@ -1,0 +1,21 @@
+{
+    "model_name": "mobilenet_v3_small",
+    "data_dir": ".",
+    "splits_dir": "data/splits",
+    "checkpoint_dir": "checkpoints",
+
+    "hyperparameters": {
+        "batch_size": 32,
+        "num_epochs": 10,
+        "learning_rate": 0.001
+    },
+
+    "transformations": [
+        {
+            "name": "cutmix",
+            "params": {
+                "alpha": 1.0
+            }
+        }
+    ]
+}
