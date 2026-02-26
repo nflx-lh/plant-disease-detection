@@ -163,7 +163,7 @@ def _build_transform_from_step(step: Dict[str, Any]):
             value=value,
             inplace=inplace,
         )
-    
+
     elif name == "cutmix" or name == "mixup":
         # These are handled in collate_fn, not as part of transform pipeline
         return None
@@ -188,7 +188,9 @@ def _inject_custom_train_transforms(
     if not custom_steps:
         return train_transform
 
-    custom_ops = [_build_transform_from_step(s) for s in custom_steps]
+    custom_ops = [
+        op for s in custom_steps if (op := _build_transform_from_step(s)) is not None
+    ]
 
     image_ops = [
         op for op in custom_ops if not isinstance(op, transforms.RandomErasing)
@@ -275,7 +277,51 @@ def get_transforms(
 
     return train_transform, val_transform, test_transform
 
-def get_collate_fn(transforms_config: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]] = None, num_classes = 26):
+
+class CustomCollate:
+    def __init__(
+        self,
+        use_cutmix=False,
+        use_mixup=False,
+        cutmix_alpha=1.0,
+        cutmix_p=0.5,
+        mixup_alpha=1.0,
+        mixup_p=0.5,
+        num_classes=26,
+    ):
+        self.use_cutmix = use_cutmix
+        self.use_mixup = use_mixup
+        self.cutmix_alpha = cutmix_alpha
+        self.cutmix_p = cutmix_p
+        self.mixup_alpha = mixup_alpha
+        self.mixup_p = mixup_p
+        self.num_classes = num_classes
+
+    def __call__(self, batch):
+        images, targets = default_collate(batch)
+        fn = None
+        if self.use_cutmix and self.use_mixup:
+            fn = RandomChoice(
+                [
+                    CutMix(alpha=self.cutmix_alpha, num_classes=self.num_classes),
+                    MixUp(alpha=self.mixup_alpha, num_classes=self.num_classes),
+                ],
+                p=[self.cutmix_p, self.mixup_p],
+            )
+        elif self.use_cutmix:
+            fn = CutMix(alpha=self.cutmix_alpha, num_classes=self.num_classes)
+        elif self.use_mixup:
+            fn = MixUp(alpha=self.mixup_alpha, num_classes=self.num_classes)
+
+        if fn is not None:
+            images, targets = fn(images, targets)
+        return images, targets
+
+
+def get_collate_fn(
+    transforms_config: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]] = None,
+    num_classes=26,
+):
     """
     Returns a custom collate function if CutMix or MixUp is specified in transforms_config.
 
@@ -288,37 +334,37 @@ def get_collate_fn(transforms_config: Optional[Union[Dict[str, Any], List[Dict[s
     use_cutmix = False
     use_mixup = False
     cutmix_alpha = 1.0
+    cutmix_p = 0.5
     mixup_alpha = 1.0
+    mixup_p = 0.5
 
     transforms_config = _normalize_steps(transforms_config)
-    
+
     for step in transforms_config:
         if step["name"] == "cutmix":
-            cutmix_alpha = step["params"].get("alpha", 1.0)
-            cutmix_p = step["params"].get("p", 0.5)
+            params = step.get("params", {}) or {}
+            cutmix_alpha = params.get("alpha", 1.0)
+            cutmix_p = params.get("p", 0.5)
             use_cutmix = True
         elif step["name"] == "mixup":
-            mixup_alpha = step["params"].get("alpha", 1.0)
-            mixup_p = step["params"].get("p", 0.5)
+            params = step.get("params", {}) or {}
+            mixup_alpha = params.get("alpha", 1.0)
+            mixup_p = params.get("p", 0.5)
             use_mixup = True
 
-    def collate_fn(batch):
-        images, targets = default_collate(batch)
-        fn = None
-        if use_cutmix and use_mixup:
-            fn = RandomChoice([CutMix(alpha=cutmix_alpha, num_classes=num_classes),
-                                MixUp(alpha=mixup_alpha, num_classes=num_classes)], 
-                              p=[cutmix_p, mixup_p])
-        elif use_cutmix:
-            fn = CutMix(alpha=cutmix_alpha, num_classes=num_classes)
-        elif use_mixup:
-            fn = MixUp(alpha=mixup_alpha, num_classes=num_classes)
+    if not use_cutmix and not use_mixup:
+        return None
 
-        if fn is not None:
-            images, targets = fn(images, targets)
-        return images, targets
+    return CustomCollate(
+        use_cutmix=use_cutmix,
+        use_mixup=use_mixup,
+        cutmix_alpha=cutmix_alpha,
+        cutmix_p=cutmix_p,
+        mixup_alpha=mixup_alpha,
+        mixup_p=mixup_p,
+        num_classes=num_classes,
+    )
 
-    return collate_fn
 
 def get_default_transforms(model, model_name: str, image_size: int = 224):
     """
