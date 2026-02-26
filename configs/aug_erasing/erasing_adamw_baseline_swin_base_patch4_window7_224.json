@@ -1,0 +1,28 @@
+{
+    "model_name": "swin_base_patch4_window7_224",
+    "data_dir": ".",
+    "splits_dir": "data/splits",
+    "checkpoint_dir": "checkpoints/baseline",
+
+    "hyperparameters": {
+        "batch_size": 32,
+        "num_epochs": 20,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.05,
+        "optimizer": "adamw",
+        "scheduler": "cosine"
+    },
+
+    "transformations": [
+        {
+            "name": "random_erasing",
+            "params": {
+                "p": 0.20,
+                "scale": [0.02, 0.08],
+                "ratio": [0.3, 3.3],
+                "value": "random",
+                "inplace": false
+            }
+        }
+    ]
+}
