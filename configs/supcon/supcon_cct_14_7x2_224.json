@@ -1,12 +1,12 @@
 {
-    "model_name": "maxvit_base_tf_224",
+    "model_name": "cct_14_7x2_224",
     "data_dir": "../plant-disease-detection",
     "splits_dir": "../plant-disease-detection/data/splits",
     "checkpoint_dir": "checkpoints/supcon",
 
     "hyperparameters": {
-        "batch_size": 64,
-        "num_epochs": 5,
+        "batch_size": 32,
+        "num_epochs": 10,
         "learning_rate": 0.0001
     },
 
