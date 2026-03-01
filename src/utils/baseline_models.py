@@ -20,7 +20,7 @@ import src.cct.cct as cct
 # ssl._create_default_https_context = ssl._create_unverified_context
 
 
-def get_model(model_name: str, num_classes: int = 26, pretrained: bool = True):
+def get_model(model_name: str, num_classes: int = 26, pretrained: bool = True, unfreeze_backbone: bool = True):
     """
     Entry point to get a model.
     Supported: 'mobilenet_v3_small', 'efficientnet_b0', 'vit_base_patch16_224',
@@ -54,10 +54,11 @@ def get_model(model_name: str, num_classes: int = 26, pretrained: bool = True):
         for param in model.head.parameters():
             param.requires_grad = True
 
-        # Unfreeze last few encoder layers
-        for block in model.blocks[-4:]:
-            for param in block.parameters():
-                param.requires_grad = True
+        if unfreeze_backbone:
+            # Unfreeze last few encoder layers
+            for block in model.blocks[-4:]:
+                for param in block.parameters():
+                    param.requires_grad = True
 
     elif model_name == "cct_14_7x2_224":
         model = timm.create_model(
@@ -86,12 +87,13 @@ def get_model(model_name: str, num_classes: int = 26, pretrained: bool = True):
             param.requires_grad = False
 
         # Unfreeze last two stages and the norm and head layers
-        for stage in model.layers[-2:]:
-            for param in stage.parameters():
-                param.requires_grad = True
+        if unfreeze_backbone:
+            for stage in model.layers[-2:]:
+                for param in stage.parameters():
+                    param.requires_grad = True
 
-        for param in model.norm.parameters():
-            param.requires_grad = True
+            for param in model.norm.parameters():
+                param.requires_grad = True
 
         for param in model.head.parameters():
             param.requires_grad = True
@@ -109,9 +111,10 @@ def get_model(model_name: str, num_classes: int = 26, pretrained: bool = True):
             param.requires_grad = False
 
         # Unfreeze last stage and the head layers
-        for stage in model.stages[-1:]:
-            for param in stage.parameters():
-                param.requires_grad = True
+        if unfreeze_backbone:
+            for stage in model.stages[-1:]:
+                for param in stage.parameters():
+                    param.requires_grad = True
 
         for param in model.head.parameters():
             param.requires_grad = True

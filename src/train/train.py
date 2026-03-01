@@ -218,6 +218,9 @@ def main():
     splits_dir = config.get("splits_dir", "data/splits")
     model_name = config["model_name"]  # should throw an error if missing
 
+    # Check whether or not to freeze backbone
+    unfreeze_backbone = str.lower(config.get("unfreeze_backbone", "true")) == "true"
+
     # Deserialize hyperparameters
     epochs = config["hyperparameters"].get(
         "num_epochs", config["hyperparameters"].get("epochs", 10)
@@ -253,7 +256,7 @@ def main():
 
     # Model
     print(f"Initializing {model_name}...")
-    model = get_model(model_name, num_classes=26)
+    model = get_model(model_name, num_classes=26, unfreeze_backbone=unfreeze_backbone)
     model.to(device)
 
     # Get data transforms based on model

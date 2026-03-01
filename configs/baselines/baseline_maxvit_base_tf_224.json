@@ -3,6 +3,7 @@
     "data_dir": ".",
     "splits_dir": "data/splits",
     "checkpoint_dir": "checkpoints/baseline",
+    "unfreeze_backbone": "False",
 
     "hyperparameters": {
         "batch_size": 32,
