@@ -5,6 +5,7 @@ outputs/
 checkpoints/
 
 # archives
+results_zip/tmp_results/
 *.zip
 *.tar
 *.tar.gz
