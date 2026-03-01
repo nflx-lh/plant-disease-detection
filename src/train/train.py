@@ -25,6 +25,8 @@ from pathlib import Path
 import platform
 from tqdm import tqdm
 import json
+import random
+import numpy as np
 
 # Add project root to path BEFORE importing local modules
 sys.path.append(str(Path(__file__).resolve().parents[2]))
@@ -32,12 +34,31 @@ sys.path.append(str(Path(__file__).resolve().parents[2]))
 # Import helpers for data and model loading
 from src.utils.dataloaders import get_train_dataloader, get_val_dataloader
 from src.utils.baseline_models import get_model
-from src.utils.transformations import get_transforms
+from src.utils.transformations import get_transforms, get_collate_fn
 
 # Only runs if on MacOS (Darwin is the OS kernel name for MacOS)
 # Disable SSL verification to fix for MacOS SSL error when downloading models
 if platform.system() == "Darwin":
     ssl._create_default_https_context = ssl._create_unverified_context
+
+
+def set_seed(seed=42):
+    """
+    Sets the seed for reproducibility across python, numpy, and torch.
+    """
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)  # if using multi-GPU
+
+    # Crucial for deterministic behavior on some hardware
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    # For MacOS (MPS)
+    if hasattr(torch, "mps") and torch.backends.mps.is_available():
+        torch.mps.manual_seed(seed)
 
 
 def train_one_epoch(model, loader, criterion, optimizer, device):
@@ -87,10 +108,16 @@ def train_one_epoch(model, loader, criterion, optimizer, device):
 
         # Get predictions and update total
         _, predicted = outputs.max(1)
-        total += labels.size(0)
+
+        if labels.ndim == 2:  # mixup/cutmix case
+            hard_labels = labels.argmax(dim=1)
+        else:
+            hard_labels = labels
+
+        total += hard_labels.size(0)
 
         # Count how many predictions are correct
-        correct += predicted.eq(labels).sum().item()
+        correct += predicted.eq(hard_labels).sum().item()
 
         # Update progress bar
         pbar.set_postfix(loss=loss.item(), acc=correct / total)
@@ -151,7 +178,12 @@ def validate(model, loader, criterion, device):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train Models for Plant Disease Classification")
+    # Set seed for reproducibility
+    set_seed()
+
+    parser = argparse.ArgumentParser(
+        description="Train Models for Plant Disease Classification"
+    )
     # parser.add_argument(
     #     "--model",
     #     type=str,
@@ -165,7 +197,12 @@ def main():
     # parser.add_argument("--splits-dir", type=str, default="data/splits")
     # parser.add_argument("--output-dir", type=str, default="outputs")
     # parser.add_argument("--checkpoint-dir", type=str, default="checkpoints")
-    parser.add_argument("--config", type=str, required=True, help="Path to config JSON file")
+    parser.add_argument(
+        "--config", type=str, required=True, help="Path to config JSON file"
+    )
+    parser.add_argument(
+        "--num_workers", type=int, default=4, help="Number of DataLoader workers"
+    )
     parser.add_argument("--debug", action="store_true", help="Run with small subset")
 
     args = parser.parse_args()
@@ -179,13 +216,21 @@ def main():
     checkpoint_dir = config.get("checkpoint_dir", "checkpoints")
     data_dir = config.get("data_dir", ".")
     splits_dir = config.get("splits_dir", "data/splits")
-    model_name = config["model_name"] # should throw an error if missing
-    
+    model_name = config["model_name"]  # should throw an error if missing
+
+    # Check whether or not to freeze backbone
+    unfreeze_backbone = str.lower(config.get("unfreeze_backbone", "true")) == "true"
+
     # Deserialize hyperparameters
-    epochs = config["hyperparameters"].get("epochs", 10)
+    epochs = config["hyperparameters"].get(
+        "num_epochs", config["hyperparameters"].get("epochs", 10)
+    )
     batch_size = config["hyperparameters"].get("batch_size", 32)
     lr = config["hyperparameters"].get("learning_rate", 0.001)
     weight_decay = config["hyperparameters"].get("weight_decay", 0.0)
+
+    # Deserialize transformations config
+    transform_config = config.get("transformations", None)
 
     # Setup directories
     Path(output_dir).mkdir(parents=True, exist_ok=True)
@@ -208,26 +253,39 @@ def main():
         print(f"Error: Split partitions not found in {splits_dir}")
         print("Please run M1 pipeline first.")
         return
-    
+
     # Model
     print(f"Initializing {model_name}...")
-    model = get_model(model_name, num_classes=26)
+    model = get_model(model_name, num_classes=26, unfreeze_backbone=unfreeze_backbone)
     model.to(device)
-    
+
     # Get data transforms based on model
     train_transform, val_transform, test_transform = get_transforms(
         model=model,
         model_name=model_name,
-        image_size=224
+        image_size=224,
+        transforms_config=transform_config,
     )
+
+    # Get custom collate function if CutMix or MixUp is specified
+    train_collate_fn = get_collate_fn(transforms_config=transform_config)
 
     # Load Data
     print(f"Loading data from {splits_dir}...")
     train_loader = get_train_dataloader(
-        train_csv, root_dir=data_dir, batch_size=batch_size, transforms=train_transform
+        train_csv,
+        root_dir=data_dir,
+        batch_size=batch_size,
+        transforms=train_transform,
+        collate_fn=train_collate_fn,
+        num_workers=args.num_workers,
     )
     val_loader = get_val_dataloader(
-        val_csv, root_dir=data_dir, batch_size=batch_size, transforms=val_transform
+        val_csv,
+        root_dir=data_dir,
+        batch_size=batch_size,
+        transforms=val_transform,
+        num_workers=args.num_workers,
     )
 
     # Debug mode: truncate datasets
@@ -238,7 +296,20 @@ def main():
 
     # Optimization
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    opt_name = config["hyperparameters"].get("optimizer", "Adam")
+    if opt_name.lower() == "adamw":
+        print(f"Using AdamW optimizer (WD: {weight_decay})")
+        optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
+    else:
+        print(f"Using Adam optimizer (WD: {weight_decay})")
+        optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+
+    # Learning Rate Scheduler
+    scheduler_name = config["hyperparameters"].get("scheduler")
+    scheduler = None
+    if scheduler_name == "cosine":
+        print(f"Using CosineAnnealingLR scheduler (T_max: {epochs})")
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
     # Training Loop
     best_val_acc = 0.0
@@ -259,10 +330,16 @@ def main():
         # Validate for one epoch
         val_loss, val_acc = validate(model, val_loader, criterion, device)
 
+        # Step scheduler if exists
+        if scheduler:
+            scheduler.step()
+
         # Print epoch results
         dt = time.time() - ep_start
+        current_lr = optimizer.param_groups[0]["lr"]
         print(
             f"Epoch {epoch+1}/{epochs} [{dt:.1f}s] "
+            f"LR: {current_lr:.6f} | "
             f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f} | "
             f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f}"
         )

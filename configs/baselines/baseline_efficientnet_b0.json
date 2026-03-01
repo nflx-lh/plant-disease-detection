@@ -1,5 +1,5 @@
 {
-    "model_name": "mobilenet_v3_small",
+    "model_name": "efficientnet_b0",
     "data_dir": ".",
     "splits_dir": "data/splits",
     "checkpoint_dir": "checkpoints/baseline",
