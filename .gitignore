@@ -6,6 +6,7 @@ checkpoints/
 
 # archives
 results_zip/tmp_results/
+results_zip/best_model/
 *.zip
 *.tar
 *.tar.gz

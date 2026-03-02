@@ -135,6 +135,14 @@ The core finding: models trained on PlantVillage generalize poorly to PlantDoc d
 
 Random erasing + AdamW optimizer yields the best cross-domain transfer (Macro F1 0.37), but the gap remains large, motivating further work on domain adaptation and reliability layers.
 
+## Simulator (MVP Demo)
+
+AnovaGreen Field Diagnosis — a local web app for interactive plant disease diagnosis. Upload a leaf image and get top-3 predictions from the best trained model (ViT-B/16 + random erasing + AdamW).
+
+- **Backend:** FastAPI inference service (`backend/`)
+- **Frontend:** React + Vite tablet-style UI (`frontend/`)
+- **Setup guide:** [`README_SIMULATOR.md`](README_SIMULATOR.md)
+
 ## Documentation
 
 - [Milestone details](docs/milestones.md) — step-by-step instructions for data prep (M1), CNN baselines (M2), ViT training (M3), and augmentation experiments (M4)

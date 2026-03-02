@@ -1,0 +1,10 @@
+{
+  "model_name": "vit_base_patch16_224",
+  "filename": "erasing_adamw_vit_base_patch16_224.pt",
+  "relative_path": "results_zip/best_model/erasing_adamw_vit_base_patch16_224.pt",
+  "sha256": "5776de5116ddbff02678e89ce52b2510e4fc50352729def449c81ae1abab2682",
+  "size_bytes": 576312737,
+  "description": "ViT-B/16 trained with random erasing + AdamW optimizer (best PlantDoc Macro F1)",
+  "num_classes": 26,
+  "checkpoint_keys": ["epoch", "model_state_dict", "optimizer_state_dict", "val_acc", "config"]
+}
