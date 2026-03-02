@@ -4,9 +4,19 @@ A systematic study of **cross-domain plant disease classification** using CNNs a
 
 **26 shared disease classes** | **6 model architectures** | **8 augmentation strategies** | **2 alternative training paradigms**
 
+<p align="center">
+  <img src="docs/assets/mockup.png" alt="Field Diagnosis Demo" width="640" />
+  <br />
+  <em>Inference UI mock (Simulator MVP)</em>
+</p>
+
 ## Key Results
 
 All models achieve near-perfect accuracy on PlantVillage (~99%). The meaningful benchmark is **PlantDoc** (real-world field images), where domain shift causes significant performance drops. Best results on PlantDoc, ranked by Macro F1:
+
+**TL;DR**
+- PlantVillage is near-saturated (~99% acc) across models.
+- PlantDoc is the meaningful benchmark; best Macro F1 is **0.37** (ViT-B/16 + Random Erasing + AdamW).
 
 | Experiment | Best Model | PlantDoc Acc | PlantDoc Macro F1 |
 |---|---|---:|---:|
@@ -18,7 +28,11 @@ All models achieve near-perfect accuracy on PlantVillage (~99%). The meaningful 
 | CutMix | Swin-B | 0.37 | 0.32 |
 | Baseline (no augmentation) | MaxViT-B | 0.33 | 0.29 |
 
-Full results with all model-experiment combinations: [`results_zip/report.md`](results_zip/report.md) and [`results_zip/master_results.csv`](results_zip/master_results.csv).
+- Decision metric: Macro F1 on PlantDoc.
+
+Full results:
+- Report: [`results_zip/report.md`](results_zip/report.md)
+- CSV: [`results_zip/master_results.csv`](results_zip/master_results.csv)
 
 ## Repository Structure
 
@@ -30,6 +44,8 @@ plant-disease-detection/
 │   ├── aug_cutmix/           #   CutMix
 │   ├── aug_mixup/            #   MixUp
 │   └── ...                   #   (+ cutmixup, rotate, gaussian blur, etc.)
+├── backend/                  # FastAPI inference service (Simulator)
+├── frontend/                 # React + Vite tablet-style UI (Simulator)
 ├── src/
 │   ├── train/train.py        # Unified training script
 │   ├── eval/evaluate.py      # Evaluation on PV + PlantDoc test sets
@@ -135,8 +151,20 @@ The core finding: models trained on PlantVillage generalize poorly to PlantDoc d
 
 Random erasing + AdamW optimizer yields the best cross-domain transfer (Macro F1 0.37), but the gap remains large, motivating further work on domain adaptation and reliability layers.
 
+## Simulator (MVP Demo)
+
+AnovaGreen Field Diagnosis — a local web app for interactive plant disease diagnosis. Upload a leaf image and get top-3 predictions from the best trained model (ViT-B/16 + random erasing + AdamW).
+
+- **Backend:** FastAPI inference service (`backend/`)
+- **Frontend:** React + Vite tablet-style UI (`frontend/`)
+- **Setup guide:** [`README_SIMULATOR.md`](README_SIMULATOR.md)
+
 ## Documentation
 
 - [Milestone details](docs/milestones.md) — step-by-step instructions for data prep (M1), CNN baselines (M2), ViT training (M3), and augmentation experiments (M4)
 - [Experiment report](results_zip/report.md) — full comparison across all experiments
 - [Master results CSV](results_zip/master_results.csv) — raw metrics for all runs
+
+## License
+
+MIT License (code). Datasets are subject to their respective licenses and terms.
