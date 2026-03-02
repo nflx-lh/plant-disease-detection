@@ -31,9 +31,8 @@
   - **supcon / vit_base_patch16_224** — **Acc 0.38, Macro F1 0.35**
 
 ### Gaps / pending
-- **Configs exist but no results yet:** `aug_rotate_gaussian_affine` (5 models)
-- **Intentional config gaps (results not expected):**
-  - EfficientNet-B0 missing for: `aug_gaussian-blur_only`, `aug_rotate_gaussian`, `aug_rotate_only`
+- **Configs exist but no results yet:** `aug_rotate_gaussian_affine` (6 models)
+- **Partial results (configs added, training pending):** `efficientnet_b0` for `aug_gaussian-blur_only`, `aug_rotate_gaussian`, `aug_rotate_only`
 
 ---
 
@@ -112,5 +111,5 @@ Variants are treated as separate runs due to training differences.
 
 ## Appendix: Reproducibility Notes (Coverage & Missing Runs)
 
-- Only missing augmentation experiment results: `aug_rotate_gaussian_affine` (5 model configs; no results found).
-- EfficientNet-B0 is intentionally absent (no configs) for: `aug_gaussian-blur_only`, `aug_rotate_gaussian`, `aug_rotate_only`.
+- Only missing augmentation experiment results: `aug_rotate_gaussian_affine` (6 model configs; no results found).
+- `efficientnet_b0` configs recently added for `aug_gaussian-blur_only`, `aug_rotate_gaussian`, `aug_rotate_only` — training pending.

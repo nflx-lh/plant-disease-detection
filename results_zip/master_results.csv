@@ -25,6 +25,8 @@ aug-cutmixup,vit_base_patch16_224,PV_Test,0.98,0.97,0.96,0.97,0.98,0.98,0.98
 aug-cutmixup,vit_base_patch16_224,PlantDoc_Test,0.32,0.41,0.31,0.28,0.41,0.32,0.29
 aug-gaussian-blur-only,cct_14_7x2_224,PV_Test,0.99,0.99,0.99,0.99,0.99,0.99,0.99
 aug-gaussian-blur-only,cct_14_7x2_224,PlantDoc_Test,0.35,0.30,0.35,0.29,0.32,0.35,0.30
+aug-gaussian-blur-only,efficientnet_b0,PV_Test,pending,pending,pending,pending,pending,pending,pending
+aug-gaussian-blur-only,efficientnet_b0,PlantDoc_Test,pending,pending,pending,pending,pending,pending,pending
 aug-gaussian-blur-only,maxvit_base_tf_224,PV_Test,0.99,0.99,0.99,0.99,0.99,0.99,0.99
 aug-gaussian-blur-only,maxvit_base_tf_224,PlantDoc_Test,0.30,0.35,0.29,0.27,0.37,0.30,0.28
 aug-gaussian-blur-only,mobilenet_v3_small,PV_Test,0.99,0.98,0.99,0.98,0.99,0.99,0.99
@@ -47,6 +49,8 @@ aug-mixup,vit_base_patch16_224,PV_Test,0.97,0.97,0.96,0.96,0.97,0.97,0.97
 aug-mixup,vit_base_patch16_224,PlantDoc_Test,0.26,0.34,0.26,0.23,0.34,0.26,0.23
 aug-rotate-gaussian,cct_14_7x2_224,PV_Test,0.99,0.99,0.98,0.99,0.99,0.99,0.99
 aug-rotate-gaussian,cct_14_7x2_224,PlantDoc_Test,0.37,0.40,0.37,0.33,0.42,0.37,0.33
+aug-rotate-gaussian,efficientnet_b0,PV_Test,pending,pending,pending,pending,pending,pending,pending
+aug-rotate-gaussian,efficientnet_b0,PlantDoc_Test,pending,pending,pending,pending,pending,pending,pending
 aug-rotate-gaussian,maxvit_base_tf_224,PV_Test,0.99,0.98,0.99,0.98,0.99,0.99,0.99
 aug-rotate-gaussian,maxvit_base_tf_224,PlantDoc_Test,0.29,0.26,0.29,0.25,0.26,0.29,0.26
 aug-rotate-gaussian,mobilenet_v3_small,PV_Test,0.99,0.98,0.98,0.98,0.99,0.99,0.99
@@ -57,6 +61,8 @@ aug-rotate-gaussian,vit_base_patch16_224,PV_Test,0.98,0.98,0.98,0.98,0.98,0.98,0
 aug-rotate-gaussian,vit_base_patch16_224,PlantDoc_Test,0.26,0.29,0.25,0.22,0.30,0.26,0.22
 aug-rotate-only,cct_14_7x2_224,PV_Test,0.99,0.99,0.98,0.98,0.99,0.99,0.99
 aug-rotate-only,cct_14_7x2_224,PlantDoc_Test,0.39,0.41,0.39,0.34,0.43,0.39,0.35
+aug-rotate-only,efficientnet_b0,PV_Test,pending,pending,pending,pending,pending,pending,pending
+aug-rotate-only,efficientnet_b0,PlantDoc_Test,pending,pending,pending,pending,pending,pending,pending
 aug-rotate-only,maxvit_base_tf_224,PV_Test,0.99,0.98,0.98,0.98,0.99,0.99,0.99
 aug-rotate-only,maxvit_base_tf_224,PlantDoc_Test,0.31,0.34,0.29,0.27,0.34,0.31,0.28
 aug-rotate-only,mobilenet_v3_small,PV_Test,0.98,0.98,0.98,0.98,0.99,0.98,0.98
@@ -85,6 +91,18 @@ aug_erasing,vit_base_patch16_224,PV_Test,0.99,0.99,0.99,0.99,0.99,0.99,0.99
 aug_erasing,vit_base_patch16_224,PlantDoc_Test,0.28,0.33,0.29,0.25,0.34,0.28,0.24
 aug_erasing,vit_base_patch16_224_adamw,PV_Test,1.00,1.00,1.00,1.00,1.00,1.00,1.00
 aug_erasing,vit_base_patch16_224_adamw,PlantDoc_Test,0.41,0.49,0.39,0.37,0.51,0.41,0.39
+aug_rotate_gaussian_affine,cct_14_7x2_224,PV_Test,pending,pending,pending,pending,pending,pending,pending
+aug_rotate_gaussian_affine,cct_14_7x2_224,PlantDoc_Test,pending,pending,pending,pending,pending,pending,pending
+aug_rotate_gaussian_affine,efficientnet_b0,PV_Test,pending,pending,pending,pending,pending,pending,pending
+aug_rotate_gaussian_affine,efficientnet_b0,PlantDoc_Test,pending,pending,pending,pending,pending,pending,pending
+aug_rotate_gaussian_affine,maxvit_base_tf_224,PV_Test,pending,pending,pending,pending,pending,pending,pending
+aug_rotate_gaussian_affine,maxvit_base_tf_224,PlantDoc_Test,pending,pending,pending,pending,pending,pending,pending
+aug_rotate_gaussian_affine,mobilenet_v3_small,PV_Test,pending,pending,pending,pending,pending,pending,pending
+aug_rotate_gaussian_affine,mobilenet_v3_small,PlantDoc_Test,pending,pending,pending,pending,pending,pending,pending
+aug_rotate_gaussian_affine,swin_base_patch4_window7_224,PV_Test,pending,pending,pending,pending,pending,pending,pending
+aug_rotate_gaussian_affine,swin_base_patch4_window7_224,PlantDoc_Test,pending,pending,pending,pending,pending,pending,pending
+aug_rotate_gaussian_affine,vit_base_patch16_224,PV_Test,pending,pending,pending,pending,pending,pending,pending
+aug_rotate_gaussian_affine,vit_base_patch16_224,PlantDoc_Test,pending,pending,pending,pending,pending,pending,pending
 baseline,cct_14_7x2_224,PV_Test,0.99,0.99,0.99,0.99,0.99,0.99,0.99
 baseline,cct_14_7x2_224,PlantDoc_Test,0.32,0.38,0.31,0.28,0.39,0.32,0.29
 baseline,efficientnet_b0,PV_Test,0.99,0.99,0.99,0.99,0.99,0.99,0.99
