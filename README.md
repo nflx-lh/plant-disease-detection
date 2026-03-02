@@ -91,7 +91,7 @@ python src/eval/evaluate.py \
 | MaxViT-B | Transformer | timm |
 | CCT-14/7x2 | Transformer | custom (`src/cct/`) |
 
-All models use ImageNet pre-trained weights with a frozen backbone and fine-tuned classification head (26 classes).
+All models use ImageNet pre-trained weights (26 classes). MobileNetV3 and EfficientNet-B0 are fully trainable (no frozen layers). ViT unfreezes the last 4 encoder blocks, CCT unfreezes the last 2 blocks + classifier, Swin unfreezes the last 2 stages + norm layer, and MaxViT unfreezes the last stage. All models fine-tune their classification heads.
 
 ## Experiments
 
