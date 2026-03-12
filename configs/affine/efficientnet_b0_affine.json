@@ -1,0 +1,25 @@
+{
+    "model_name": "efficientnet_b0",
+    "data_dir": ".",
+    "splits_dir": "data/splits",
+    "checkpoint_dir": "checkpoints/baseline",
+
+    "hyperparameters": {
+        "batch_size": 32,
+        "num_epochs": 10,
+        "learning_rate": 0.001
+    },
+
+    "transformations": {
+  "steps": [
+    { "name": "random_affine",
+      "params": {
+        "degrees": 45,
+        "translate": [0.2, 0.2],
+        "scale": [0.7, 1.3],
+        "shear": 15
+      }
+      }
+  ]
+}
+}
