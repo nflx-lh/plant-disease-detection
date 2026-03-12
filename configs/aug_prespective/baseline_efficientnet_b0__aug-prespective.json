@@ -2,7 +2,7 @@
     "model_name": "efficientnet_b0",
     "data_dir": ".",
     "splits_dir": "data/splits",
-    "checkpoint_dir": "checkpoints/augmented_prespective",
+    "checkpoint_dir": "checkpoints/augmented_perspective",
 
     "hyperparameters": {
         "batch_size": 32,
