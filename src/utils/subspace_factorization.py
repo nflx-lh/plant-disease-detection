@@ -14,6 +14,7 @@ class SubspaceDGModel(nn.Module):
     def __init__(self, backbone_name="vit_base_patch16_224", embed_dim=256,
                  num_classes=26, num_styles=4, pretrained=True):
         super().__init__()
+        self.backbone_name = backbone_name
         self.backbone = get_model(backbone_name, num_classes=num_classes, pretrained=pretrained, unfreeze_backbone=False)
         feat_dim = self.backbone.num_features
         embed_dim = feat_dim
@@ -30,7 +31,7 @@ class SubspaceDGModel(nn.Module):
     def forward(self, x):
         feat = self.backbone.forward_features(x)
 
-        if feat.ndim == 4:
+        if self.backbone_name in ["efficientnet_b0", "mobilenet_v3_small"]:
             feat = nn.functional.adaptive_avg_pool2d(feat, 1)
             feat = feat.flatten(1)
         else:

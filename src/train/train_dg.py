@@ -59,7 +59,7 @@ def train_one_epoch(model, loader, supcon_criterion, ce_criterion, optimizer, de
         Wc, Ws = model.class_subspace.weight, model.style_subspace.weight
         loss_orth = torch.norm(Wc @ Ws.T, p='fro')
 
-        loss = loss_supcon_class + loss_supcon_style + loss_class + 0.5*loss_style + lambda_orth*loss_orth
+        loss = loss_supcon_class + 0.5 * loss_supcon_style + loss_class + 0.25 * loss_style + lambda_orth * loss_orth
         loss.backward()
         optimizer.step()
 
