@@ -11,5 +11,9 @@
         "learning_rate": 0.001
     },
 
-    "transformations": []
+    "transformations": {
+      "steps": [
+        { "name": "random_perspective", "params": { "distortion_scale": 0.2, "p": 0.3, "fill": 0} }
+      ]
+    }
 }

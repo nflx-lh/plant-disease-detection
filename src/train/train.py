@@ -272,7 +272,7 @@ def main():
         lora_config = LoraConfig(
             r=lora_enabled.get("r", 8),
             lora_alpha=lora_enabled.get("lora_alpha", 16),
-            target_modules=lora_enabled.get("target_modules", ["qkv"]), # need to find away to check on the attention layer for each model to have it as target modules 
+            target_modules=lora_enabled.get("target_modules", ["qkv"]), # possible layer to freeze: "qkv", "fc1", "fc2", "proj"
             lora_dropout=lora_enabled.get("lora_dropout", 0.1),
             bias="none",
             task_type=None,
