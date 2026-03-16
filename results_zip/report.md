@@ -122,14 +122,6 @@ The zero-shot variant significantly outperforms the finetuned variant on PlantDo
 
 ## 8) Notes
 - `multi_task_vit` and `supcon` are separate paradigms (no configs under `./configs/`).
-- `aug-perspective` data uses 4 decimal places (from eval CSVs); other experiments use 2 decimal places (from sklearn classification reports).
 - No parsing errors encountered in report files.
 - Full run-by-run metrics are stored in `master_results.csv` for filtering/plotting.
 
----
-
-## Appendix: Reproducibility Notes
-
-- `aug-perspective` results were contributed by Jesslyn (zero-shot / backbone frozen).
-- `affine` results were contributed by BT2526 (one macro_F1 value corrected from 0.37 to 0.32).
-- `aug-perspective-finetuned` results added from Perspective.zip reports.
