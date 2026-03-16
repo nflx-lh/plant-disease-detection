@@ -2,10 +2,10 @@
 
 A systematic study of **cross-domain plant disease classification** using CNNs and Vision Transformers. Models are trained on PlantVillage (lab conditions) and evaluated on PlantDoc (field conditions) to measure robustness under domain shift.
 
-**26 shared disease classes** | **6 model architectures** | **8 augmentation strategies** | **2 alternative training paradigms**
+**26 shared disease classes** | **6 model architectures** | **11 augmentation strategies** | **2 alternative training paradigms**
 
 <p align="center">
-  <img src="docs/assets/mockup.png" alt="Field Diagnosis Demo" width="640" />
+  <img src="docs/assets/mockup_1.png" alt="Field Diagnosis Demo" width="640" />
   <br />
   <em>Inference UI mock (Simulator MVP)</em>
 </p>
@@ -16,17 +16,22 @@ All models achieve near-perfect accuracy on PlantVillage (~99%). The meaningful 
 
 **TL;DR**
 - PlantVillage is near-saturated (~99% acc) across models.
-- PlantDoc is the meaningful benchmark; best Macro F1 is **0.37** (ViT-B/16 + Random Erasing + AdamW).
+- PlantDoc is the meaningful benchmark; best Macro F1 is **0.45** (Swin-B + Perspective, zero-shot).
 
 | Experiment | Best Model | PlantDoc Acc | PlantDoc Macro F1 |
 |---|---|---:|---:|
+| Perspective (zero-shot) | Swin-B | 0.48 | 0.45 |
 | Random Erasing | ViT-B/16 (AdamW) | 0.41 | 0.37 |
 | Supervised Contrastive | ViT-B/16 | 0.38 | 0.35 |
 | Rotation Only | CCT-14 | 0.39 | 0.34 |
 | Rotation + Gaussian Blur | CCT-14 | 0.37 | 0.33 |
 | Gaussian Blur Only | Swin-B | 0.36 | 0.33 |
+| Affine | Swin-B | 0.37 | 0.32 |
 | CutMix | Swin-B | 0.37 | 0.32 |
+| Perspective (finetuned) | CCT-14 | 0.37 | 0.32 |
+| CutMixUp | Swin-B | 0.34 | 0.32 |
 | Baseline (no augmentation) | MaxViT-B | 0.33 | 0.29 |
+| MixUp | Swin-B | 0.33 | 0.28 |
 
 - Decision metric: Macro F1 on PlantDoc.
 
@@ -138,7 +143,7 @@ Training is config-driven. Each JSON config specifies the model, hyperparameters
 }
 ```
 
-**Augmentation strategies tested:** baseline (none), random erasing, rotation, gaussian blur, rotation + gaussian blur, CutMix, MixUp, CutMixUp.
+**Augmentation strategies tested:** baseline (none), random erasing, rotation, gaussian blur, rotation + gaussian blur, CutMix, MixUp, CutMixUp, affine, perspective (zero-shot), perspective (finetuned).
 
 **Alternative paradigms:** Supervised Contrastive Learning (SupCon), Multi-Task ViT.
 
@@ -149,11 +154,11 @@ The core finding: models trained on PlantVillage generalize poorly to PlantDoc d
 - **PlantVillage:** clean backgrounds, centered leaves, uniform lighting
 - **PlantDoc:** cluttered backgrounds, variable angles, natural lighting
 
-Random erasing + AdamW optimizer yields the best cross-domain transfer (Macro F1 0.37), but the gap remains large, motivating further work on domain adaptation and reliability layers.
+Perspective augmentation with a frozen backbone (zero-shot) yields the best cross-domain transfer (Macro F1 0.45), followed by random erasing + AdamW (Macro F1 0.37). The gap remains large, motivating further work on domain adaptation and reliability layers.
 
 ## Simulator (MVP Demo)
 
-AnovaGreen Field Diagnosis — a local web app for interactive plant disease diagnosis. Upload a leaf image and get top-3 predictions from the best trained model (ViT-B/16 + random erasing + AdamW).
+AnovaGreen Field Diagnosis — a local web app for interactive plant disease diagnosis. Upload a leaf image and get top-3 predictions from a trained model.
 
 - **Backend:** FastAPI inference service (`backend/`)
 - **Frontend:** React + Vite tablet-style UI (`frontend/`)
