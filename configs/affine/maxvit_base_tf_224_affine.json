@@ -1,0 +1,25 @@
+{
+    "model_name": "maxvit_base_tf_224",
+    "data_dir": ".",
+    "splits_dir": "data/splits",
+    "checkpoint_dir": "checkpoints/baseline",
+
+    "hyperparameters": {
+        "batch_size": 32,
+        "num_epochs": 10,
+        "learning_rate": 0.001
+    },
+
+    "transformations": {
+  "steps": [
+    { "name": "random_affine",
+      "params": {
+        "degrees": 10,
+        "translate": [0.05, 0.05],
+        "scale": [0.95, 1.05],
+        "shear": 5
+      }
+    }
+  ]
+}
+}
