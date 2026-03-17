@@ -2,7 +2,7 @@
 
 A systematic study of **cross-domain plant disease classification** using CNNs and Vision Transformers. Models are trained on PlantVillage (lab conditions) and evaluated on PlantDoc (field conditions) to measure robustness under domain shift.
 
-**26 shared disease classes** | **6 model architectures** | **11 augmentation strategies** | **2 alternative training paradigms**
+**26 shared disease classes** | **6 model architectures** | **11 augmentation strategies**
 
 <p align="center">
   <img src="docs/assets/mockup_1.png" alt="Field Diagnosis Demo" width="640" />
@@ -22,7 +22,6 @@ All models achieve near-perfect accuracy on PlantVillage (~99%). The meaningful 
 |---|---|---:|---:|
 | Perspective (zero-shot) | Swin-B | 0.48 | 0.45 |
 | Random Erasing | ViT-B/16 (AdamW) | 0.41 | 0.37 |
-| Supervised Contrastive | ViT-B/16 | 0.38 | 0.35 |
 | Rotation Only | CCT-14 | 0.39 | 0.34 |
 | Rotation + Gaussian Blur | CCT-14 | 0.37 | 0.33 |
 | Gaussian Blur Only | Swin-B | 0.36 | 0.33 |
@@ -145,8 +144,6 @@ Training is config-driven. Each JSON config specifies the model, hyperparameters
 
 **Augmentation strategies tested:** baseline (none), random erasing, rotation, gaussian blur, rotation + gaussian blur, CutMix, MixUp, CutMixUp, affine, perspective (zero-shot), perspective (finetuned).
 
-**Alternative paradigms:** Supervised Contrastive Learning (SupCon), Multi-Task ViT.
-
 ## Domain Gap
 
 The core finding: models trained on PlantVillage generalize poorly to PlantDoc due to the domain shift between lab-controlled and field-captured images.
@@ -158,7 +155,9 @@ Perspective augmentation with a frozen backbone (zero-shot) yields the best cros
 
 ## Simulator (MVP Demo)
 
-AnovaGreen Field Diagnosis — a local web app for interactive plant disease diagnosis. Upload a leaf image and get top-3 predictions from a trained model.
+AnovaGreen Field Diagnosis — a local web app for interactive plant disease diagnosis. Upload a leaf image and get top-3 predictions with confidence scores from a trained model.
+
+At 0.45 Macro F1 the model is not accurate enough to rely on a single prediction, so the system is designed as a **decision-support tool**: it narrows 26 possible diseases to 3 likely candidates, and the farmer makes the final call using local knowledge (crop type, season, regional prevalence).
 
 - **Backend:** FastAPI inference service (`backend/`)
 - **Frontend:** React + Vite tablet-style UI (`frontend/`)
