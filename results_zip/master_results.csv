@@ -115,10 +115,6 @@ baseline,swin_base_patch4_window7_224,PV_Test,1.00,1.00,1.00,1.00,1.00,1.00,1.00
 baseline,swin_base_patch4_window7_224,PlantDoc_Test,0.34,0.31,0.31,0.26,0.34,0.34,0.29
 baseline,vit_base_patch16_224,PV_Test,0.98,0.98,0.98,0.98,0.98,0.98,0.98
 baseline,vit_base_patch16_224,PlantDoc_Test,0.29,0.40,0.30,0.27,0.40,0.29,0.27
-multi_task_vit,vit_base_patch16_224,PV_Test,0.98,0.98,0.97,0.97,0.98,0.98,0.98
-multi_task_vit,vit_base_patch16_224,PlantDoc_Test,0.23,0.34,0.23,0.21,0.35,0.23,0.21
-supcon,vit_base_patch16_224,PV_Test,0.98,0.97,0.97,0.97,0.98,0.98,0.98
-supcon,vit_base_patch16_224,PlantDoc_Test,0.38,0.42,0.38,0.35,0.42,0.38,0.35
 lora,swin_base_patch4_window7_224,PV_Test,0.99,0.99,0.99,0.99,0.99,0.99,0.99
 lora,swin_base_patch4_window7_224,PlantDoc_Test,0.43,0.48,0.41,0.38,0.50,0.43,0.40
 lora,vit_base_patch16_224,PV_Test,0.98,0.98,0.97,0.98,0.99,0.98,0.98
