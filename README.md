@@ -2,7 +2,7 @@
 
 A systematic study of **cross-domain plant disease classification** using CNNs and Vision Transformers. Models are trained on PlantVillage (lab conditions) and evaluated on PlantDoc (field conditions) to measure robustness under domain shift.
 
-**26 shared disease classes** | **6 model architectures** | **11 augmentation strategies**
+**26 shared disease classes** | **6 model architectures** | **13 experiment configurations**
 
 <p align="center">
   <img src="docs/assets/mockup_1.png" alt="Field Diagnosis Demo" width="640" />
@@ -21,6 +21,8 @@ All models achieve near-perfect accuracy on PlantVillage (~99%). The meaningful 
 | Experiment | Best Model | PlantDoc Acc | PlantDoc Macro F1 |
 |---|---|---:|---:|
 | Perspective (zero-shot) | Swin-B | 0.48 | 0.45 |
+| Style Disentanglement | Swin-B | 0.47 | 0.42 |
+| Baseline-LoRA | Swin-B | 0.43 | 0.38 |
 | Random Erasing | ViT-B/16 (AdamW) | 0.41 | 0.37 |
 | Rotation Only | CCT-14 | 0.39 | 0.34 |
 | Rotation + Gaussian Blur | CCT-14 | 0.37 | 0.33 |
@@ -142,7 +144,7 @@ Training is config-driven. Each JSON config specifies the model, hyperparameters
 }
 ```
 
-**Augmentation strategies tested:** baseline (none), random erasing, rotation, gaussian blur, rotation + gaussian blur, CutMix, MixUp, CutMixUp, affine, perspective (zero-shot), perspective (finetuned).
+**Augmentation strategies tested:** baseline (none), random erasing, rotation, gaussian blur, rotation + gaussian blur, CutMix, MixUp, CutMixUp, affine, perspective (zero-shot), perspective (finetuned). **Additional training paradigms:** baseline-LoRA (parameter-efficient fine-tuning), style disentanglement (subspace factorization).
 
 ## Domain Gap
 
