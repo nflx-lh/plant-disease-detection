@@ -163,3 +163,15 @@ aug-perspective-finetuned,swin_base_patch4_window7_224,PV_Test,1.00,1.00,1.00,1.
 aug-perspective-finetuned,swin_base_patch4_window7_224,PlantDoc_Test,0.33,0.31,0.32,0.28,0.32,0.33,0.29
 aug-perspective-finetuned,vit_base_patch16_224,PV_Test,0.98,0.97,0.97,0.97,0.98,0.98,0.98
 aug-perspective-finetuned,vit_base_patch16_224,PlantDoc_Test,0.27,0.32,0.27,0.24,0.32,0.27,0.24
+all-augs,cct_14_7x2_224,PV_Test,0.99,0.99,0.99,0.99,0.99,0.99,0.99
+all-augs,cct_14_7x2_224,PlantDoc_Test,0.31,0.31,0.30,0.27,0.33,0.31,0.28
+all-augs,efficientnet_b0,PV_Test,1.00,0.99,0.99,0.99,1.00,1.00,1.00
+all-augs,efficientnet_b0,PlantDoc_Test,0.22,0.18,0.20,0.17,0.21,0.22,0.19
+all-augs,maxvit_base_tf_224,PV_Test,0.97,0.97,0.96,0.96,0.97,0.97,0.97
+all-augs,maxvit_base_tf_224,PlantDoc_Test,0.26,0.30,0.25,0.23,0.32,0.26,0.25
+all-augs,mobilenet_v3_small,PV_Test,0.99,0.98,0.99,0.99,0.99,0.99,0.99
+all-augs,mobilenet_v3_small,PlantDoc_Test,0.18,0.12,0.17,0.13,0.13,0.18,0.14
+all-augs,swin_base_patch4_window7_224,PV_Test,0.99,0.99,0.99,0.99,0.99,0.99,0.99
+all-augs,swin_base_patch4_window7_224,PlantDoc_Test,0.47,0.52,0.47,0.43,0.53,0.47,0.43
+all-augs,vit_base_patch16_224,PV_Test,pending,pending,pending,pending,pending,pending,pending
+all-augs,vit_base_patch16_224,PlantDoc_Test,pending,pending,pending,pending,pending,pending,pending
